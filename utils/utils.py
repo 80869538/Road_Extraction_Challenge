@@ -38,3 +38,9 @@ def show_images(imgs, num_rows, num_cols, titles=None, scale=1.5):
         if titles:
             ax.set_title(titles[i])
     return axes
+
+def get_dataloader_workers():
+    """Use 4 processes to read the data.
+
+    Defined in :numref:`sec_fashion_mnist`"""
+    return 4

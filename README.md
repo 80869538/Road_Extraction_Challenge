@@ -64,7 +64,7 @@ plt.show()
 ``` 
 ![The result](assets/images/Sample_Train_Pairs.png)
 
-In the label images, white and black represent borders and background, respectively, while the other colors correspond to different classes. 
+In the label images, white and black represent borders and background, respectively. 
 
 ## Contact
 Andrew Jiang - andrew.jiang81@gmail.com
