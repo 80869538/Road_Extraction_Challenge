@@ -17,7 +17,7 @@ def read_RE_images(RE_dir, is_train=True):
 
     data_dir = os.path.join(RE_dir)
     mode = torchvision.io.image.ImageReadMode.RGB
-    JPGImages = glob.glob(data_dir + '/*.jpg')[:3000]
+    JPGImages = glob.glob(data_dir + '/*.jpg')[:300]
     num_examples = len(JPGImages)
     indices = list(range(num_examples))
     random.shuffle(indices)
@@ -66,7 +66,7 @@ class RoadSegDetaset(torch.utils.data.Dataset):
 
 
     def __getitem__(self, idx):
-        return (self.features[idx], label_indices(self.labels[idx], self.colormap2label))
+        return (self.features[idx], label_indices(self.labels[idx], self.color2label))
     
     def __len__(self):
         return len(self.features)
@@ -81,7 +81,7 @@ def load_data(batch_size):
     print(len(train_features))
     train_dataset = RoadSegDetaset(train_features,train_labels)
     test_dataset = RoadSegDetaset(test_features,test_labels)
-    assert len(train_dataset) + len(test_dataset) == 3000
+    # assert len(train_dataset) + len(test_dataset) == 6226
 
     num_workers = utils.get_dataloader_workers()
 
@@ -96,5 +96,8 @@ def load_data(batch_size):
 
 
     return train_iter, test_iter
-
-load_data(64)
+# if __name__ == "__main__":
+#     train_iter, test_iter = load_data(64)
+#     for X,Y in train_iter:
+#         print(X.shape)
+#         print(Y.shape)
