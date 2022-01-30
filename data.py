@@ -57,6 +57,9 @@ def label_indices(colormap, color2label):
     idx = idx.sum(axis=-1)
     return color2label[idx]
 
+def reverse_label(colormap):
+    return (colormap * 255).expand(3,1024,1024)
+
 class RoadSegDetaset(torch.utils.data.Dataset):
     """A customized dataset to load the RE dataset."""
     def __init__(self, feature_pathes, label_pathes):
@@ -115,9 +118,9 @@ def load_data(batch_size):
 
 
 if __name__ == "__main__":
-    train_iter,valid_iter ,test_iter = load_data(498)
+    train_iter,valid_iter ,test_iter = load_data(4)
     for X,Y in train_iter:
         print(X.shape)
-        print(Y.shape)
+        Y = reverse_label(Y[0])
         print(torch.unique(Y))
         

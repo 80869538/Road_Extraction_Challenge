@@ -6,6 +6,8 @@ import torchvision
 from data import load_data
 from loss import DiceLoss
 import torch
+from data import reverse_label
+
 
 
 def train_batch(net, X, y, loss, trainer, devices):
@@ -17,6 +19,7 @@ def train_batch(net, X, y, loss, trainer, devices):
     trainer.zero_grad()
     pred = net(X)
     l = loss(pred, y)
+    utils.show_images(reverse_label(pred[0].squeeze(0)),reverse_label(y[0]))
     l.sum().backward()
     trainer.step()
     train_loss_sum = l.sum()
@@ -33,6 +36,7 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
                             legend=['train loss', 'train acc', 'test acc'])
     net = nn.DataParallel(net, device_ids=devices).to(devices[0])
     for epoch in range(num_epochs):
+        print(epoch)
         # Sum of training loss, sum of training accuracy, no. of examples,
         # no. of predictions
         metric = utils.Accumulator(4)
@@ -40,10 +44,11 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
             timer.start()
             l, iou_sum = train_batch(
                 net, features, labels, loss, trainer, devices)
-            print(iou_sum)
-            metric.add(l, iou_sum, labels.shape[0], labels.numel())
+
+            metric.add(l, iou_sum, 1, 1)
             timer.stop()
             if (i + 1) % (num_batches // 5) == 0 or i == num_batches - 1:
+                print(metric[1] / metric[3])
                 animator.add(epoch + (i + 1) / num_batches,
                              (metric[0] / metric[2], metric[1] / metric[3],
                               None))
@@ -54,7 +59,7 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
     print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec on '
           f'{str(devices)}')
 
-pretrained_net = torchvision.models.resnet18(pretrained=True)
+pretrained_net = torchvision.models.resnet50(pretrained=True)
 list(pretrained_net.children())[-3:]
 #copies all the pretrained layers in the ResNet-18 except for 
 #the final global average pooling layer and the fully-connected layer that are closest to the output
@@ -62,18 +67,20 @@ net = nn.Sequential(*list(pretrained_net.children())[:-2])
 
 
 num_classes = 1
-net.add_module('final_conv', nn.Conv2d(512, num_classes, kernel_size=1))
+net.add_module('final_conv', nn.Conv2d(2048, num_classes, kernel_size=1))
 net.add_module('transpose_conv', nn.ConvTranspose2d(num_classes, num_classes,
                                     kernel_size=64, padding=16, stride=32))
+net.add_module('activation',nn.Sigmoid())
+X = torch.rand(size=(1, 3, 1024, 1024))
 
 W = bilinear_kernel(num_classes, num_classes, 64)
 net.transpose_conv.weight.data.copy_(W)
-batch_size = 4
+batch_size = 8
 train_iter, valid_iter,test_iter = load_data(batch_size)
 
 loss = DiceLoss()
 
-num_epochs, lr, wd, devices = 1, 0.001, 1e-3, utils.try_all_gpus()
-trainer = torch.optim.SGD(net.parameters(), lr=lr, weight_decay=wd)
-optimizer = torch.optim.Adam(net.parameters(),lr=lr)
+num_epochs, lr, wd, devices = 5, 0.0001, 1e-3, utils.try_all_gpus()
+
+trainer  = torch.optim.Adam(net.parameters(),lr=lr,weight_decay=wd)
 train(net, train_iter, valid_iter, loss, trainer, num_epochs, devices)

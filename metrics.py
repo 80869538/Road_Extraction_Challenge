@@ -19,9 +19,8 @@ def iou(pr, gt, eps=1e-7, threshold=0.5, ignore_channels=None):
     Returns:
         float: IoU  score
     """
-    gt.unsqueeze(1)
+    gt = gt.unsqueeze(1)
     pr = _threshold(pr, threshold=threshold)
-
     intersection = torch.sum(gt * pr)
     union = torch.sum(gt) + torch.sum(pr) - intersection + eps
     return (intersection + eps) / union
@@ -40,5 +39,5 @@ def evaluate_epoch_iou(net, data_iter, device=None):
         for X, y in data_iter:
             X = X.to(device)
             y = y.to(device)
-            metric.add(iou(net(X), y), utils.size(y))
+            metric.add(iou(net(X), y), 1)
     return metric[0] / metric[1]

@@ -152,6 +152,22 @@ class Accumulator:
 
     def __getitem__(self, idx):
         return self.data[idx]
+# helper function for data visualization
+def visualize(**images):
+    """
+    Plot images in one row
+    """
+    n_images = len(images)
+    plt.figure(figsize=(20,8))
+    for idx, (name, image) in enumerate(images.items()):
+        plt.subplot(1, n_images, idx + 1)
+        plt.xticks([]); 
+        plt.yticks([])
+        # get title from the parameter names
+        plt.title(name.replace('_',' ').title(), fontsize=20)
+        image = image.permute(1, 2, 0).numpy().astype('int32')
+        plt.imshow(image)
+    plt.show()
 
 reduce_sum = lambda x, *args, **kwargs: x.sum(*args, **kwargs)
 argmax = lambda x, *args, **kwargs: x.argmax(*args, **kwargs)
