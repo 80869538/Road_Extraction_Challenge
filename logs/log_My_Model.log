@@ -1,0 +1,22 @@
+Epoch 0
+train_loss: 0.475187403308617 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+test_IoU: 0.43778851667007845 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+
+Epoch 1
+train_loss: 0.4004769158516666 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+test_IoU: 0.44293361476489473 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+
+Epoch 2
+train_loss: 0.39188579318991046 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+test_IoU: 0.46619648128360897 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+
+Epoch 3
+train_loss: 0.3884668967348203 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+test_IoU: 0.4704497011450978 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+
+Epoch 4
+train_loss: 0.38553069134233847 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+test_IoU: 0.47291095341954914 <_io.TextIOWrapper name='./logs/log_My_Model.log' mode='w' encoding='UTF-8'>
+
+loss 0.386, train IoU 0.460, test IOU 0.473
+1.2 examples/sec on [device(type='cuda', index=0)]
