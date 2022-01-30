@@ -63,8 +63,7 @@ def reverse_label(colormap):
     return (colormap * 255).expand(3,1024,1024)
 
 def transformer(image, mask):
-    # image and mask are PIL image object. 
-    img_w, img_h = image.size
+
     
     # Random horizontal flipping
     if random.random() > 0.5:
@@ -75,15 +74,18 @@ def transformer(image, mask):
     if random.random() > 0.5:
         image = TF.vflip(image)
         mask = TF.vflip(mask)
+    
+    return image, mask
 
 class RoadSegDetaset(torch.utils.data.Dataset):
     """A customized dataset to load the RE dataset."""
-    def __init__(self, feature_pathes, label_pathes):
+    def __init__(self, feature_pathes, label_pathes,training):
         self.transform = torchvision.transforms.Normalize(
             mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self.color2label = color2label()
         self.feature_pathes = feature_pathes
         self.label_pathes = label_pathes
+        self.training = training
         
         print('read ' + str(len(self.feature_pathes)) + ' examples')
     
@@ -92,10 +94,12 @@ class RoadSegDetaset(torch.utils.data.Dataset):
 
 
     def __getitem__(self, idx):
-        feature = torchvision.io.read_image(self.feature_pathes[idx])
-        feature = self.normalize_image(feature)                 
+        feature = torchvision.io.read_image(self.feature_pathes[idx])                
         label = torchvision.io.read_image(self.label_pathes[idx], mode=torchvision.io.image.ImageReadMode.RGB)
-        feature, label = transformer(feature, label)
+        if self.training:
+            feature, label = transformer(feature, label)
+        feature = self.normalize_image(feature) 
+
         return (feature, label_indices(label, self.color2label))
     
     def __len__(self):
@@ -110,9 +114,9 @@ def load_data(batch_size):
     train_features_pathes, train_labels_pathes,test_features_pathes, test_labels_pathes, valid_features_pathes, valid_labels_pathes = read_RE_images(RE_dir, True)
     
     print(len(train_features_pathes))
-    train_dataset = RoadSegDetaset(train_features_pathes,train_labels_pathes)
-    valid_dataset = RoadSegDetaset(valid_features_pathes,valid_labels_pathes)
-    test_dataset = RoadSegDetaset(test_features_pathes,test_labels_pathes)
+    train_dataset = RoadSegDetaset(train_features_pathes,train_labels_pathes,True)
+    valid_dataset = RoadSegDetaset(valid_features_pathes,valid_labels_pathes,False)
+    test_dataset = RoadSegDetaset(test_features_pathes,test_labels_pathes,False)
     # assert len(train_dataset) + len(test_dataset) == 6226
 
     num_workers = utils.get_dataloader_workers()
