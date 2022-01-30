@@ -5,6 +5,8 @@ from utils import utils as utils
 import glob
 from matplotlib import pyplot as plt
 import random
+import torchvision.transforms.functional as TF
+
 
 
 COLORS = [[0,0,0], [255,255,255]]
@@ -60,6 +62,20 @@ def label_indices(colormap, color2label):
 def reverse_label(colormap):
     return (colormap * 255).expand(3,1024,1024)
 
+def transformer(image, mask):
+    # image and mask are PIL image object. 
+    img_w, img_h = image.size
+    
+    # Random horizontal flipping
+    if random.random() > 0.5:
+        image = TF.hflip(image)
+        mask = TF.hflip(mask)
+
+    # Random vertical flipping
+    if random.random() > 0.5:
+        image = TF.vflip(image)
+        mask = TF.vflip(mask)
+
 class RoadSegDetaset(torch.utils.data.Dataset):
     """A customized dataset to load the RE dataset."""
     def __init__(self, feature_pathes, label_pathes):
@@ -79,6 +95,7 @@ class RoadSegDetaset(torch.utils.data.Dataset):
         feature = torchvision.io.read_image(self.feature_pathes[idx])
         feature = self.normalize_image(feature)                 
         label = torchvision.io.read_image(self.label_pathes[idx], mode=torchvision.io.image.ImageReadMode.RGB)
+        feature, label = transformer(feature, label)
         return (feature, label_indices(label, self.color2label))
     
     def __len__(self):

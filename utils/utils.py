@@ -165,7 +165,7 @@ def visualize(**images):
         plt.yticks([])
         # get title from the parameter names
         plt.title(name.replace('_',' ').title(), fontsize=20)
-        image = image.permute(1, 2, 0).numpy().astype('int32')
+        image = image.permute(1, 2, 0).cpu().detach().numpy().astype('int32')
         plt.imshow(image)
     plt.show()
 

@@ -7,7 +7,7 @@ from data import load_data
 from loss import DiceLoss
 import torch
 from data import reverse_label
-
+from models import My_Model
 
 
 def train_batch(net, X, y, loss, trainer, devices):
@@ -19,7 +19,10 @@ def train_batch(net, X, y, loss, trainer, devices):
     trainer.zero_grad()
     pred = net(X)
     l = loss(pred, y)
-    utils.show_images(reverse_label(pred[0].squeeze(0)),reverse_label(y[0]))
+    pr_mask = reverse_label(pred[0].squeeze(0))
+    gt_mask = reverse_label(y[0])
+    
+    # utils.visualize(pr_mask =pr_mask.cpu(),gt_mask=gt_mask.cpu())
     l.sum().backward()
     trainer.step()
     train_loss_sum = l.sum()
@@ -54,33 +57,16 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
                               None))
         test_iou = evaluate_epoch_iou(net, test_iter)
         animator.add(epoch + 1, (None, None, test_iou))
-    print(f'loss {metric[0] / metric[2]:.3f}, train acc '
-          f'{metric[1] / metric[3]:.3f}, test acc {test_iou:.3f}')
+    print(f'loss {metric[0] / metric[2]:.3f}, train IoU '
+          f'{metric[1] / metric[3]:.3f}, test IOU {test_iou:.3f}')
     print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec on '
           f'{str(devices)}')
 
-pretrained_net = torchvision.models.resnet50(pretrained=True)
-list(pretrained_net.children())[-3:]
-#copies all the pretrained layers in the ResNet-18 except for 
-#the final global average pooling layer and the fully-connected layer that are closest to the output
-net = nn.Sequential(*list(pretrained_net.children())[:-2])
 
-
-num_classes = 1
-net.add_module('final_conv', nn.Conv2d(2048, num_classes, kernel_size=1))
-net.add_module('transpose_conv', nn.ConvTranspose2d(num_classes, num_classes,
-                                    kernel_size=64, padding=16, stride=32))
-net.add_module('activation',nn.Sigmoid())
-X = torch.rand(size=(1, 3, 1024, 1024))
-
-W = bilinear_kernel(num_classes, num_classes, 64)
-net.transpose_conv.weight.data.copy_(W)
 batch_size = 8
 train_iter, valid_iter,test_iter = load_data(batch_size)
-
 loss = DiceLoss()
-
 num_epochs, lr, wd, devices = 5, 0.0001, 1e-3, utils.try_all_gpus()
-
+net = My_Model()
 trainer  = torch.optim.Adam(net.parameters(),lr=lr,weight_decay=wd)
 train(net, train_iter, valid_iter, loss, trainer, num_epochs, devices)
