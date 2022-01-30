@@ -12,6 +12,7 @@ This project uses [DeepGlobe Road Extraction Challenge](https://competitions.cod
    4. [Usages](#usages)
       1. [Dataset](#dataset)
       2. [Train](#train)
+      3. [Test](#test)
    5. [Implementation details](#imp)
       1. [Data Split](#ds)
       2. [Data Augmentation](#da)
@@ -38,7 +39,7 @@ On MacOS
    git clone https://github.com/80869538/Road_Extraction_Challenge.git
    ```
 
-2. Move to the dictory
+2. Move to the directory
    ```sh
    cd ./Road_Extraction_Challenge
    ```
@@ -81,13 +82,20 @@ In the label images, white and black represent borders and background, respectiv
    ```sh
       python train.py "Unet"
    ```
+
+### Test <a name="test"></a>
+   ```sh
+      python test.py 
+   ```
+   will output predication result on test set
+   
 ## Implementation details<a name="imp"></a>
 
 ### Data split <a name="ds"></a>
 The origanial dataset is splited into training, validation and test dataset with the ratio of 8:1:1. Random seed is set to achieve the same split on different trainings.
 
 ### Data Augmentation <a name="da"></a>
-Intuitively, the oritation of the satellite images shouldn't affect the predition result. To account for this fact, each image and mask pair has been randomly fliped vertically or horizentally.
+Intuitively, the orientation of the satellite images shouldn't affect the predition result. To account for this fact, each image and mask pair has been randomly fliped vertically or horizentally.
 
 ### FCN <a name="fcn"></a>
 The architecture of the My_Model is as follows:
@@ -115,6 +123,8 @@ Sample output after one epoch
 ### Unet <a name="unet"></a>
 [U-net](https://arxiv.org/pdf/1505.04597.pdf) has been proven to have very good performance on semantic segmentation problem. I have tested it's performance with the help of open source library. 
 
+Training Result:
+![Training Result](assets/images/Unet_Train.png)
 
 ## Debug Diary <a name="contact"></a>
    1. Memory explosion 
