@@ -20,7 +20,6 @@ class DiceLoss(_Loss):
 
         bs = y_true.size(0) #batch size
         num_classes = y_pred.size(1)
-        print(num_classes)
         dims = (0, 2)
 
         y_true = y_true.view(bs, 1, -1)

@@ -36,6 +36,7 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
                devices=utils.try_all_gpus()):
     """Train a model with mutiple GPUs
     """
+    print(list(net.children()))
     NAME = 'log_My_Model'
     mylog = open('./logs/'+NAME+'.log','w')
 
@@ -45,7 +46,7 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
                             legend=['train loss', 'train acc', 'test acc'])
     net = nn.DataParallel(net, device_ids=devices).to(devices[0])
     for epoch in range(num_epochs):
-        print(epoch)
+        print("Start Epoch " + str(epoch))
         # Sum of training loss, sum of training accuracy, no. of examples,
         # no. of predictions
         metric = utils.Accumulator(4)
@@ -57,26 +58,29 @@ def train(net, train_iter, test_iter, loss, trainer, num_epochs,
             metric.add(l, iou_sum, 1, 1)
             timer.stop()
             if (i + 1) % (num_batches // 5) == 0 or i == num_batches - 1:
-                print(metric[1] / metric[3])
                 animator.add(epoch + (i + 1) / num_batches,
                              (metric[0] / metric[2], metric[1] / metric[3],
                               None))
         test_iou = evaluate_epoch_iou(net, test_iter)
         train_epoch_loss = metric[0] / metric[2]
         animator.add(epoch + 1, (None, None, test_iou))
+       
+        print('********', file=mylog)
+        print('epoch: ' + str(epoch) +'     time: ' + str(timer.sum()), file=mylog)
+        print('train_loss: ' + str(metric[0] / metric[2]), mylog)
+        print('test_IoU: ' + str(test_iou), mylog)
+        
+        if train_epoch_loss >= train_epoch_best_loss:
+            pass
+        else:
+            train_epoch_best_loss = train_epoch_loss
+            torch.save(net, './weights/best_model_My_Model.pth')
+
     print(f'loss {metric[0] / metric[2]:.3f}, train IoU '
           f'{metric[1] / metric[3]:.3f}, test IOU {test_iou:.3f}')
     print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec on '
           f'{str(devices)}')
-    print >> mylog, '********'
-    print >> mylog, 'epoch:',epoch,'    time:',timer.sum()
-    print >> mylog, 'train_loss:',metric[0] / metric[2]
 
-    if train_epoch_loss >= train_epoch_best_loss:
-        pass
-    else:
-        train_epoch_best_loss = train_epoch_loss
-        torch.save(net, './weights/best_model_My_Model.pth')
 
 def main(argv):
     if argv and argv[0] == "My_Model":

@@ -25,7 +25,6 @@ def read_RE_images(RE_dir, is_train=True):
     random.shuffle(indices)
     train_indices = torch.tensor(indices[0:int(0.8*num_examples)])
     valid_indices = torch.tensor(indices[int(0.8*num_examples):int(0.9*num_examples)])
-    print(train_indices)
 
     PNGImages = [JPGImage.replace('sat.jpg','mask.png') for JPGImage in JPGImages]
     
@@ -113,7 +112,6 @@ def load_data(batch_size):
     random.seed(1) 
     train_features_pathes, train_labels_pathes,test_features_pathes, test_labels_pathes, valid_features_pathes, valid_labels_pathes = read_RE_images(RE_dir, True)
     
-    print(len(train_features_pathes))
     train_dataset = RoadSegDetaset(train_features_pathes,train_labels_pathes,True)
     valid_dataset = RoadSegDetaset(valid_features_pathes,valid_labels_pathes,False)
     test_dataset = RoadSegDetaset(test_features_pathes,test_labels_pathes,False)
